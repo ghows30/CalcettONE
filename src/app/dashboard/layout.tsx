@@ -1,8 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Trophy, Home, Settings, LogOut, PlusSquare } from 'lucide-react'
+import { Trophy, Home, LogOut, PlusSquare } from 'lucide-react'
 import { logout } from '@/app/auth/actions'
+import MobileNav from '@/components/dashboard/MobileNav'
 
 export default async function DashboardLayout({
     children,
@@ -29,9 +30,12 @@ export default async function DashboardLayout({
     const initials = displayName.substring(0, 2).toUpperCase()
 
     return (
-        <div className="flex h-screen bg-slate-950 text-slate-200 overflow-hidden font-sans">
-            {/* Sidebar */}
-            <aside className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col transition-all duration-300">
+        <div className="flex flex-col md:flex-row h-screen bg-slate-950 text-slate-200 overflow-hidden font-sans">
+            {/* Mobile Navigation */}
+            <MobileNav displayName={displayName} email={user.email || ''} initials={initials} />
+
+            {/* Desktop Sidebar */}
+            <aside className="hidden md:flex w-64 bg-slate-900 border-r border-slate-800 flex-col transition-all duration-300 shrink-0">
                 <div className="h-16 flex items-center px-6 border-b border-slate-800">
                     <Link href="/dashboard" className="flex items-center gap-2 text-xl font-bold text-white">
                         <Trophy className="h-6 w-6 text-emerald-400" />
@@ -88,7 +92,7 @@ export default async function DashboardLayout({
                 {/* Ambient background glow */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-emerald-500/5 rounded-full blur-[150px] pointer-events-none"></div>
 
-                <div className="relative z-10 w-full h-full p-8">
+                <div className="relative z-10 w-full h-full p-6 md:p-8">
                     {children}
                 </div>
             </main>
