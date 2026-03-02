@@ -23,7 +23,7 @@ export async function addMatchStats(leagueId: string, formData: FormData) {
         .single()
 
     if (leagueError || league?.admin_id !== user.id) {
-        return { error: 'Non hai i permessi per eseguire questa azione.' }
+        redirect(`/dashboard/leagues/${leagueId}/admin?error=` + encodeURIComponent('Non hai i permessi per eseguire questa azione.'))
     }
 
     // 2. Create the Match
@@ -39,7 +39,7 @@ export async function addMatchStats(leagueId: string, formData: FormData) {
         .single()
 
     if (matchError || !match) {
-        return { error: 'Errore durante la creazione della partita.' }
+        redirect(`/dashboard/leagues/${leagueId}/admin?error=` + encodeURIComponent('Errore durante la creazione della partita.'))
     }
 
     // 3. Process and insert Match Stats
@@ -48,7 +48,9 @@ export async function addMatchStats(leagueId: string, formData: FormData) {
 
     // We assume the form sends a hidden input 'player_ids' containing comma-separated UUIDs
     const playerIdsString = formData.get('player_ids') as string
-    if (!playerIdsString) return { error: 'Nessun giocatore trovato.' }
+    if (!playerIdsString) {
+        redirect(`/dashboard/leagues/${leagueId}/admin?error=` + encodeURIComponent('Nessun giocatore trovato.'))
+    }
 
     const playerIds = playerIdsString.split(',')
 
@@ -80,7 +82,7 @@ export async function addMatchStats(leagueId: string, formData: FormData) {
 
         if (statsError) {
             // Rollback match might be needed in a real prod env, but for now we throw error
-            return { error: 'Errore durante l\'inserimento delle statistiche: ' + statsError.message }
+            redirect(`/dashboard/leagues/${leagueId}/admin?error=` + encodeURIComponent('Errore durante l\'inserimento delle statistiche: ' + statsError.message))
         }
     }
 
