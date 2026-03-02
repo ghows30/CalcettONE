@@ -19,7 +19,7 @@ export default async function LoginPage({
                     <p className="text-slate-400 font-medium">Bentornato sul campo. Accedi per giocare.</p>
                 </div>
 
-                <form className="space-y-5">
+                <form action={login} className="space-y-5">
                     <div>
                         <label className="block text-sm font-semibold text-slate-300 mb-2" htmlFor="email">
                             Email
@@ -53,7 +53,7 @@ export default async function LoginPage({
 
                     <div className="pt-4">
                         <button
-                            formAction={login}
+                            type="submit"
                             className="w-full rounded-xl bg-emerald-500 hover:bg-emerald-400 px-4 py-4 font-bold text-slate-950 transition-all active:scale-[0.98] shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_30px_rgba(16,185,129,0.4)]"
                         >
                             Scendi in campo
