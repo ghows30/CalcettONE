@@ -1,7 +1,8 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Settings, Trophy, Activity, Target, User } from 'lucide-react'
+import { ArrowLeft, Settings, Trophy, Activity, Target, User, LogOut } from 'lucide-react'
+import { leaveLeague } from '@/app/dashboard/actions'
 
 export default async function LeaguePage({
     params
@@ -31,6 +32,8 @@ export default async function LeaguePage({
     }
 
     const isAdmin = league.admin_id === user.id
+
+    const leaveLeagueWithId = leaveLeague.bind(null, leagueId)
 
     // Fetch all members with their aggregate stats
     const { data: members, error: membersError } = await supabase
@@ -117,7 +120,7 @@ export default async function LeaguePage({
                     </div>
 
                     <div className="flex gap-3">
-                        {isAdmin && (
+                        {isAdmin ? (
                             <Link
                                 href={`/dashboard/leagues/${leagueId}/admin`}
                                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-bold hover:bg-emerald-400 transition-colors shadow-[0_0_15px_rgba(16,185,129,0.2)]"
@@ -125,6 +128,16 @@ export default async function LeaguePage({
                                 <Settings className="h-4 w-4" />
                                 Gestisci Partite
                             </Link>
+                        ) : (
+                            <form action={leaveLeagueWithId}>
+                                <button
+                                    type="submit"
+                                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-red-500/20 bg-red-500/5 text-red-500 font-bold hover:bg-red-500/10 transition-colors"
+                                >
+                                    <LogOut className="h-4 w-4" />
+                                    Abbandona Lega
+                                </button>
+                            </form>
                         )}
                     </div>
                 </div>
@@ -197,9 +210,9 @@ export default async function LeaguePage({
                                     <tr key={player.id} className="hover:bg-white/5 transition-colors">
                                         <td className="p-4 pl-6 text-center">
                                             <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg font-bold ${index === 0 ? 'bg-yellow-500/20 text-yellow-500' :
-                                                    index === 1 ? 'bg-slate-300/20 text-slate-300' :
-                                                        index === 2 ? 'bg-orange-600/20 text-orange-500' :
-                                                            'bg-slate-800 text-slate-400'
+                                                index === 1 ? 'bg-slate-300/20 text-slate-300' :
+                                                    index === 2 ? 'bg-orange-600/20 text-orange-500' :
+                                                        'bg-slate-800 text-slate-400'
                                                 }`}>
                                                 {index + 1}
                                             </span>

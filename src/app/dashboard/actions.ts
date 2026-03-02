@@ -48,7 +48,8 @@ export async function createLeague(formData: FormData) {
 }
 
 export async function joinLeague(formData: FormData) {
-    let redirectPath = null
+    let leagueId: string | null = null;
+    let errorMsg: string | null = null;
 
     try {
         const supabase = await createClient()
@@ -60,20 +61,46 @@ export async function joinLeague(formData: FormData) {
 
         const join_code = (formData.get('join_code') as string)?.trim().toUpperCase()
 
-        const { data: leagueId, error: joinError } = await supabase
+        const { data, error: joinError } = await supabase
             .rpc('join_league_by_code', { code_to_join: join_code })
 
         if (joinError) {
             return { error: joinError.message }
         }
 
+        leagueId = data;
         revalidatePath('/dashboard', 'layout')
-        redirectPath = `/dashboard/leagues/${leagueId}`
     } catch (e: any) {
+        // Next.js redirect throws a special error, but since we handle it outside,
+        // we only catch real errors here.
+        if (e.message?.includes('NEXT_REDIRECT')) throw e;
         return { error: 'Si è verificato un errore: ' + e.message }
     }
 
-    if (redirectPath) {
-        redirect(redirectPath)
+    if (leagueId) {
+        redirect(`/dashboard/leagues/${leagueId}`)
     }
+}
+
+export async function leaveLeague(leagueId: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        redirect('/login')
+    }
+
+    const { error } = await supabase
+        .from('league_members')
+        .delete()
+        .eq('league_id', leagueId)
+        .eq('user_id', user.id)
+
+    if (error) {
+        // In a real app we might want to redirect with an error param
+        redirect('/dashboard?error=leave_failed')
+    }
+
+    revalidatePath('/dashboard', 'layout')
+    redirect('/dashboard')
 }

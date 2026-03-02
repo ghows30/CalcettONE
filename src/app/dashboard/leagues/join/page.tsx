@@ -16,21 +16,18 @@ export default function JoinLeaguePage() {
         setIsPending(true)
         setError(null)
 
-        try {
-            const formData = new FormData()
-            formData.append('join_code', joinCode)
+        const formData = new FormData()
+        formData.append('join_code', joinCode)
 
-            const res = await joinLeague(formData)
+        const res = await joinLeague(formData)
 
-            if (res?.error) {
-                setError(res.error)
-            }
-        } catch (e: any) {
-            console.error('CLIENT: Errore connessione:', e)
-            setError('Errore di connessione. Riprova.')
-        } finally {
+        if (res?.error) {
+            setError(res.error)
             setIsPending(false)
         }
+        // If successful, the server action will redirect and the page will unmount.
+        // We don't call setIsPending(false) here to avoid a flash of the button state
+        // before the browser actually navigates away.
     }
 
     return (
