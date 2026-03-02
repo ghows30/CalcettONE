@@ -40,7 +40,6 @@ export async function createLeague(formData: FormData) {
         .single()
 
     if (error) {
-        console.error('Supabase error creating league:', error)
         return { error: 'Si è verificato un errore durante la creazione della lega.' }
     }
 
@@ -49,44 +48,32 @@ export async function createLeague(formData: FormData) {
 }
 
 export async function joinLeague(formData: FormData) {
-    const supabase = await createClient()
+    let redirectPath = null
 
-    const {
-        data: { user },
-    } = await supabase.auth.getUser()
+    try {
+        const supabase = await createClient()
+        const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) {
-        redirect('/login')
-    }
-
-    const join_code = formData.get('join_code') as string
-
-    // Find the league by code
-    const { data: league, error: findError } = await supabase
-        .from('leagues')
-        .select('id')
-        .eq('join_code', join_code)
-        .single()
-
-    if (findError || !league) {
-        return { error: 'Codice invito non valido o lega non trovata.' }
-    }
-
-    // Join the league
-    const { error: joinError } = await supabase
-        .from('league_members')
-        .insert({
-            league_id: league.id,
-            user_id: user.id,
-        })
-
-    if (joinError) {
-        if (joinError.code === '23505') { // Unique violation
-            return { error: 'Fai già parte di questa lega.' }
+        if (!user) {
+            return { error: 'Sessione scaduta o non loggato' }
         }
-        return { error: 'Errore durante l\'unione alla lega.' }
+
+        const join_code = (formData.get('join_code') as string)?.trim().toUpperCase()
+
+        const { data: leagueId, error: joinError } = await supabase
+            .rpc('join_league_by_code', { code_to_join: join_code })
+
+        if (joinError) {
+            return { error: joinError.message }
+        }
+
+        revalidatePath('/dashboard', 'layout')
+        redirectPath = `/dashboard/leagues/${leagueId}`
+    } catch (e: any) {
+        return { error: 'Si è verificato un errore: ' + e.message }
     }
 
-    revalidatePath('/dashboard', 'layout')
-    redirect(`/dashboard/leagues/${league.id}`)
+    if (redirectPath) {
+        redirect(redirectPath)
+    }
 }

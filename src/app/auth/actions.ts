@@ -42,7 +42,7 @@ export async function signup(formData: FormData) {
     }
 
     revalidatePath('/', 'layout')
-    redirect('/login?message=Controlla la tua email per confermare l\'account')
+    redirect('/dashboard')
 }
 
 export async function logout() {
