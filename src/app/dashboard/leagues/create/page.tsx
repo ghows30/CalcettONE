@@ -54,6 +54,26 @@ export default function CreateLeaguePage() {
                         </div>
                     </div>
 
+                    <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl group hover:border-emerald-500/30 transition-all">
+                        <div className="flex-1 pr-4">
+                            <label htmlFor="allow_member_stats_edit" className="block text-sm font-bold text-white mb-1 group-hover:text-emerald-400 transition-colors">
+                                Permetti Modifica Statistiche
+                            </label>
+                            <p className="text-xs text-slate-500">
+                                Se attivato, ogni partecipante potrà modificare i propri gol, assist e voti.
+                            </p>
+                        </div>
+                        <div className="relative inline-flex items-center cursor-pointer">
+                            <input
+                                type="checkbox"
+                                name="allow_member_stats_edit"
+                                id="allow_member_stats_edit"
+                                className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                        </div>
+                    </div>
+
                     {error && (
                         <div className="rounded-xl bg-red-500/10 p-4 text-sm text-red-400 border border-red-500/20">
                             {error}

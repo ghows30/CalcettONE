@@ -47,8 +47,9 @@ export default async function LeaguePage({
     // We need to fetch stats separately and aggregate them since Supabase JS client doesn't directly do complex GROUP BY out-of-the-box easily without a Database View
     const { data: stats } = await supabase
         .from('match_stats')
-        .select('player_id, goals, assists, vote, match_id, matches!inner(league_id)')
+        .select('player_id, goals, assists, vote, match_id, matches!inner(league_id, status)')
         .eq('matches.league_id', leagueId)
+        .eq('matches.status', 'finalized')
 
     // Aggregate stats in JS
     const leaderboard = (members || []).map(member => {
@@ -71,23 +72,19 @@ export default async function LeaguePage({
             }
         })
 
-        const avgVote = votesCount > 0 ? (totalVotePoints / votesCount).toFixed(1) : '-'
+        const totalStars = totalVotePoints
 
-        // Formula per il punteggio totale (Fantacalcetto) - Esempio:
-        // (MediaVoto * 3) + (Gol * 3) + (Assist * 1)
-        let score = 0
-        if (votesCount > 0) {
-            score = ((totalVotePoints / votesCount) * 3) + (totalGoals * 3) + (totalAssists * 1)
-        }
+        // Formula: Punti = Goal + Assist + Stelle
+        const score = totalGoals + totalAssists + totalStars
 
         return {
             id: member.user_id,
             name: profile?.full_name || 'Utente',
             goals: totalGoals,
             assists: totalAssists,
-            avgVote,
+            stars: totalStars,
             matchesPlayed: playerStats.length,
-            score: parseFloat(score.toFixed(1))
+            score: score
         }
     })
 
@@ -120,13 +117,20 @@ export default async function LeaguePage({
                     </div>
 
                     <div className="flex gap-3">
+                        <Link
+                            href={`/dashboard/leagues/${leagueId}/matches`}
+                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 text-white font-bold hover:bg-white/10 transition-colors"
+                        >
+                            <Activity className="h-4 w-4" />
+                            Partite
+                        </Link>
                         {isAdmin ? (
                             <Link
                                 href={`/dashboard/leagues/${leagueId}/admin`}
                                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-bold hover:bg-emerald-400 transition-colors shadow-[0_0_15px_rgba(16,185,129,0.2)]"
                             >
                                 <Settings className="h-4 w-4" />
-                                Gestisci Partite
+                                Gestisci
                             </Link>
                         ) : (
                             <form action={leaveLeagueWithId}>
@@ -135,7 +139,7 @@ export default async function LeaguePage({
                                     className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-red-500/20 bg-red-500/5 text-red-500 font-bold hover:bg-red-500/10 transition-colors"
                                 >
                                     <LogOut className="h-4 w-4" />
-                                    Abbandona Lega
+                                    Abbandona
                                 </button>
                             </form>
                         )}
@@ -194,7 +198,7 @@ export default async function LeaguePage({
                                 <th className="p-4 text-center">P</th>
                                 <th className="p-4 text-center">G</th>
                                 <th className="p-4 text-center">A</th>
-                                <th className="p-4 text-center">Voto</th>
+                                <th className="p-4 text-center">Stelle</th>
                                 <th className="p-4 pr-6 text-right text-emerald-400">Punti</th>
                             </tr>
                         </thead>
@@ -226,7 +230,7 @@ export default async function LeaguePage({
                                         <td className="p-4 text-center text-slate-400">{player.matchesPlayed}</td>
                                         <td className="p-4 text-center font-medium text-slate-300">{player.goals}</td>
                                         <td className="p-4 text-center font-medium text-slate-300">{player.assists}</td>
-                                        <td className="p-4 text-center font-medium text-slate-300">{player.avgVote}</td>
+                                        <td className="p-4 text-center font-medium text-slate-300">{player.stars}</td>
                                         <td className="p-4 pr-6 text-right font-bold text-emerald-400 text-lg">{player.score}</td>
                                     </tr>
                                 ))

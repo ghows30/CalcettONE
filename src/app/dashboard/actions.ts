@@ -26,6 +26,7 @@ export async function createLeague(formData: FormData) {
     }
 
     const name = formData.get('name') as string
+    const allow_member_stats_edit = formData.get('allow_member_stats_edit') === 'on'
     const join_code = generateJoinCode()
 
     // Create the league. The trigger in SQL will automatically add the admin as a member.
@@ -35,6 +36,7 @@ export async function createLeague(formData: FormData) {
             name,
             join_code,
             admin_id: user.id,
+            allow_member_stats_edit,
         })
         .select()
         .single()
