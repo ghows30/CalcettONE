@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Trophy, Home, LogOut, PlusSquare } from 'lucide-react'
+import { Trophy, Home, LogOut, PlusSquare, User, Settings } from 'lucide-react'
 import { logout } from '@/app/auth/actions'
 import MobileNav from '@/components/dashboard/MobileNav'
 
@@ -22,12 +22,14 @@ export default async function DashboardLayout({
 
     const { data: profile } = await supabase
         .from('profiles')
-        .select('full_name, avatar_url')
+        .select('full_name, first_name, last_name, avatar_url')
         .eq('id', user.id)
         .single()
 
     const displayName = profile?.full_name || user.email?.split('@')[0] || 'Utente'
-    const initials = displayName.substring(0, 2).toUpperCase()
+    const initials = profile?.first_name && profile?.last_name
+        ? (profile.first_name[0] + profile.last_name[0]).toUpperCase()
+        : displayName.substring(0, 2).toUpperCase()
 
     return (
         <div className="flex flex-col md:flex-row h-screen bg-slate-950 text-slate-200 overflow-hidden font-sans">
@@ -63,6 +65,17 @@ export default async function DashboardLayout({
                         <PlusSquare className="h-5 w-5" />
                         Nuova Lega
                     </Link>
+
+                    <div className="pt-6 pb-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                        Account
+                    </div>
+                    <Link
+                        href="/dashboard/profile"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors font-medium"
+                    >
+                        <User className="h-5 w-5" />
+                        Il mio Profilo
+                    </Link>
                 </div>
 
                 <div className="p-4 border-t border-slate-800">
@@ -74,6 +87,9 @@ export default async function DashboardLayout({
                             <p className="text-sm font-medium text-white truncate">{displayName}</p>
                             <p className="text-xs text-slate-500 truncate">{user.email}</p>
                         </div>
+                        <Link href="/dashboard/profile" className="p-1.5 rounded-md hover:bg-white/10 text-slate-500 hover:text-white transition-colors">
+                            <Settings className="h-4 w-4" />
+                        </Link>
                     </div>
                     <form>
                         <button

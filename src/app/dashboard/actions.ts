@@ -42,7 +42,7 @@ export async function createLeague(formData: FormData) {
         .single()
 
     if (error) {
-        return { error: 'Si è verificato un errore durante la creazione della lega.' }
+        return { error: 'Si è verificato un errore durante la creazione della lega: ' + error.message }
     }
 
     revalidatePath('/dashboard', 'layout')
@@ -105,4 +105,38 @@ export async function leaveLeague(leagueId: string) {
 
     revalidatePath('/dashboard', 'layout')
     redirect('/dashboard')
+}
+
+export async function updateProfile(formData: FormData) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        return { error: 'Sessione scaduta' }
+    }
+
+    const first_name = formData.get('first_name') as string
+    const last_name = formData.get('last_name') as string
+    const full_name = `${first_name} ${last_name}`.trim()
+
+    if (!first_name || !last_name) {
+        return { error: 'Nome e Cognome sono obbligatori' }
+    }
+
+    const { error } = await supabase
+        .from('profiles')
+        .update({
+            first_name,
+            last_name,
+            full_name,
+            updated_at: new Date().toISOString(),
+        })
+        .eq('id', user.id)
+
+    if (error) {
+        return { error: 'Riprova: ' + error.message }
+    }
+
+    revalidatePath('/dashboard', 'layout')
+    return { success: true }
 }

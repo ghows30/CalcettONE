@@ -11,6 +11,14 @@ create table if not exists public.leagues (
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
+-- Ensure allow_member_stats_edit exists
+do $$
+begin
+    if not exists (select 1 from information_schema.columns where table_name='leagues' and column_name='allow_member_stats_edit') then
+        alter table public.leagues add column allow_member_stats_edit boolean default false not null;
+    end if;
+end$$;
+
 -- 2. Create league_members table
 create table if not exists public.league_members (
   league_id uuid references public.leagues(id) on delete cascade not null,

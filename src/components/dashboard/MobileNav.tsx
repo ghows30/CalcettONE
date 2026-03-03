@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Trophy, Home, PlusSquare, Menu, X, LogOut } from 'lucide-react'
+import { Trophy, Home, PlusSquare, Menu, X, LogOut, User } from 'lucide-react'
 import { logout } from '@/app/auth/actions'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
@@ -100,6 +100,15 @@ export default function MobileNav({ displayName, email, initials }: MobileNavPro
                     >
                         <PlusSquare className="h-5 w-5" />
                         Nuova Lega
+                    </Link>
+
+                    <Link
+                        href="/dashboard/profile"
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-colors font-medium"
+                    >
+                        <User className="h-5 w-5" />
+                        Mio Profilo
                     </Link>
                 </div>
 
