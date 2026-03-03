@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Settings, Trophy, Activity, Target, User, LogOut } from 'lucide-react'
+import { ArrowLeft, Settings, Trophy, Activity, Target, User, LogOut, Medal, Star } from 'lucide-react'
 import { leaveLeague } from '@/app/dashboard/actions'
 
 export default async function LeaguePage({
@@ -183,60 +183,171 @@ export default async function LeaguePage({
                 </div>
             </div>
 
-            {/* Leaderboard Table */}
-            <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-sm">
-                <div className="p-6 border-b border-white/10 bg-black/20">
-                    <h2 className="text-xl font-bold text-white">Classifica Generale</h2>
+            {/* Leaderboard Table (Desktop) / Cards (Mobile) */}
+            <div className="bg-white/5 border border-white/10 rounded-[2rem] overflow-hidden backdrop-blur-sm">
+                <div className="p-8 border-b border-white/10 bg-black/20 flex items-center justify-between">
+                    <h2 className="text-sm md:text-2xl font-black text-white tracking-tight uppercase">Classifica Generale</h2>
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{leaderboard.length} Giocatori</span>
                 </div>
 
-                <div className="overflow-x-auto">
+                {/* Desktop view */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-white/5 text-sm uppercase tracking-wider text-slate-400 font-semibold border-b border-white/10">
-                                <th className="p-4 pl-6 w-16 text-center">Pos</th>
-                                <th className="p-4">Giocatore</th>
-                                <th className="p-4 text-center">P</th>
-                                <th className="p-4 text-center">G</th>
-                                <th className="p-4 text-center">A</th>
-                                <th className="p-4 text-center">Stelle</th>
-                                <th className="p-4 pr-6 text-right text-emerald-400">Punti</th>
+                            <tr className="bg-white/5 text-[10px] uppercase tracking-[0.2em] text-slate-500 font-black border-b border-white/10">
+                                <th className="p-6 pl-8 w-20 text-center">Pos</th>
+                                <th className="p-6">Giocatore</th>
+                                <th className="p-6 text-center">Partite</th>
+                                <th className="p-6 text-center">G</th>
+                                <th className="p-6 text-center">A</th>
+                                <th className="p-6 text-center">Stelle</th>
+                                <th className="p-6 pr-10 text-right text-emerald-400">Punti</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
                             {leaderboard.length === 0 ? (
                                 <tr>
-                                    <td colSpan={7} className="p-8 text-center text-slate-500">
-                                        Nessuna statistica disponibile. Inizia a registrare le partite!
+                                    <td colSpan={7} className="p-12 text-center text-slate-500 font-bold uppercase tracking-widest text-xs">
+                                        Nessuna statistica disponibile.
                                     </td>
                                 </tr>
                             ) : (
-                                leaderboard.map((player, index) => (
-                                    <tr key={player.id} className="hover:bg-white/5 transition-colors">
-                                        <td className="p-4 pl-6 text-center">
-                                            <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg font-bold ${index === 0 ? 'bg-yellow-500/20 text-yellow-500' :
-                                                index === 1 ? 'bg-slate-300/20 text-slate-300' :
-                                                    index === 2 ? 'bg-orange-600/20 text-orange-500' :
-                                                        'bg-slate-800 text-slate-400'
-                                                }`}>
-                                                {index + 1}
-                                            </span>
-                                        </td>
-                                        <td className="p-4 font-semibold text-white flex items-center gap-3">
-                                            <div className="h-8 w-8 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center shrink-0 text-xs">
-                                                {player.name.substring(0, 2).toUpperCase()}
-                                            </div>
-                                            {player.name}
-                                        </td>
-                                        <td className="p-4 text-center text-slate-400">{player.matchesPlayed}</td>
-                                        <td className="p-4 text-center font-medium text-slate-300">{player.goals}</td>
-                                        <td className="p-4 text-center font-medium text-slate-300">{player.assists}</td>
-                                        <td className="p-4 text-center font-medium text-slate-300">{player.stars}</td>
-                                        <td className="p-4 pr-6 text-right font-bold text-emerald-400 text-lg">{player.score}</td>
-                                    </tr>
-                                ))
+                                leaderboard.map((player, index) => {
+                                    const playerInitials = player.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()
+
+                                    return (
+                                        <tr key={player.id} className="hover:bg-white/5 transition-all duration-300 group">
+                                            <td className="p-6 pl-8 text-center">
+                                                <div className="relative flex justify-center">
+                                                    <span className={`inline-flex items-center justify-center w-12 h-12 rounded-2xl font-black text-lg transition-transform group-hover:scale-110 ${index === 0 ? 'bg-yellow-500/20 text-yellow-500 shadow-[0_0_30px_rgba(234,179,8,0.2)]' :
+                                                            index === 1 ? 'bg-slate-300/20 text-slate-300' :
+                                                                index === 2 ? 'bg-orange-600/20 text-orange-500' :
+                                                                    'bg-slate-800/50 text-slate-500 border border-white/5'
+                                                        }`}>
+                                                        {index + 1}
+                                                    </span>
+                                                    {index < 3 && (
+                                                        <div className="absolute -top-1.5 -right-1.5 shadow-xl">
+                                                            <Medal className={`h-5 w-5 ${index === 0 ? 'text-yellow-500' :
+                                                                    index === 1 ? 'text-slate-300' :
+                                                                        'text-orange-500'
+                                                                }`} />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="p-6">
+                                                <div className="flex items-center gap-5">
+                                                    <div className="h-14 w-14 rounded-[1.25rem] bg-slate-800 border border-white/5 text-emerald-400 font-black flex items-center justify-center shrink-0 text-base shadow-inner group-hover:border-emerald-400/30 transition-colors">
+                                                        {playerInitials}
+                                                    </div>
+                                                    <div className="flex flex-col">
+                                                        <span className="font-black text-white group-hover:text-emerald-400 transition-colors text-xl tracking-tighter uppercase whitespace-nowrap">
+                                                            {player.name}
+                                                        </span>
+                                                        <span className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em]">
+                                                            {player.matchesPlayed} Partite Giocate
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="p-6 text-center">
+                                                <span className="text-xl font-black text-slate-400 tabular-nums">{player.matchesPlayed}</span>
+                                            </td>
+                                            <td className="p-6 text-center">
+                                                <div className="flex flex-col items-center">
+                                                    <span className="text-xl font-black text-white tabular-nums group-hover:text-emerald-400 transition-colors">{player.goals}</span>
+                                                    <span className="text-[9px] font-black uppercase text-slate-600 tracking-tighter">Gol</span>
+                                                </div>
+                                            </td>
+                                            <td className="p-6 text-center">
+                                                <div className="flex flex-col items-center">
+                                                    <span className="text-xl font-black text-white tabular-nums group-hover:text-emerald-400 transition-colors">{player.assists}</span>
+                                                    <span className="text-[9px] font-black uppercase text-slate-600 tracking-tighter">Assist</span>
+                                                </div>
+                                            </td>
+                                            <td className="p-6 text-center">
+                                                <div className="flex flex-col items-center">
+                                                    <span className="text-xl font-black text-white tabular-nums group-hover:text-emerald-400 transition-colors">{player.stars.toFixed(0)}</span>
+                                                    <span className="text-[9px] font-black uppercase text-slate-600 tracking-tighter">Stelle</span>
+                                                </div>
+                                            </td>
+                                            <td className="p-6 pr-10 text-right">
+                                                <div className="flex flex-col items-end">
+                                                    <span className="text-3xl font-black text-emerald-400 drop-shadow-[0_0_15px_rgba(16,185,129,0.3)] tabular-nums">{player.score.toFixed(0)}</span>
+                                                    <span className="text-[9px] font-black uppercase text-emerald-500/40 tracking-[0.2em]">Totale Punteggio</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )
+                                })
                             )}
                         </tbody>
                     </table>
+                </div>
+
+                {/* Mobile view (Card-based) */}
+                <div className="md:hidden divide-y divide-white/5">
+                    {leaderboard.length === 0 ? (
+                        <div className="p-12 text-center text-slate-500 font-bold uppercase tracking-widest text-xs">
+                            Nessuna statistica disponibile.
+                        </div>
+                    ) : (
+                        leaderboard.map((player, index) => {
+                            const playerInitials = player.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()
+
+                            return (
+                                <div key={player.id} className="p-6 space-y-6 active:bg-white/5 transition-colors">
+                                    <div className="flex items-center justify-between gap-4">
+                                        <div className="flex items-center gap-4">
+                                            <div className="relative">
+                                                <div className={`flex items-center justify-center w-12 h-12 rounded-2xl font-black text-lg ${index === 0 ? 'bg-yellow-500/20 text-yellow-500' :
+                                                        index === 1 ? 'bg-slate-300/20 text-slate-300' :
+                                                            index === 2 ? 'bg-orange-600/20 text-orange-500' :
+                                                                'bg-slate-800/50 text-slate-500 border border-white/5'
+                                                    }`}>
+                                                    {index + 1}
+                                                </div>
+                                                {index < 3 && (
+                                                    <div className="absolute -top-1 -right-1">
+                                                        <Medal className={`h-4 w-4 ${index === 0 ? 'text-yellow-500' :
+                                                                index === 1 ? 'text-slate-300' :
+                                                                    'text-orange-500'
+                                                            }`} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <h3 className="text-lg font-black text-white uppercase tracking-tighter">{player.name}</h3>
+                                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none mt-1">
+                                                    {player.matchesPlayed} Partite
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col items-end">
+                                            <span className="text-2xl font-black text-emerald-400 tabular-nums">{player.score.toFixed(0)}</span>
+                                            <span className="text-[9px] font-black uppercase text-emerald-500/50 tracking-widest">Punti</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-3 gap-2">
+                                        <div className="bg-white/2 rounded-xl p-3 border border-white/5 flex flex-col items-center justify-center">
+                                            <span className="text-sm font-black text-white">{player.goals}</span>
+                                            <span className="text-[9px] font-black uppercase text-slate-500 tracking-tighter">Gol</span>
+                                        </div>
+                                        <div className="bg-white/2 rounded-xl p-3 border border-white/5 flex flex-col items-center justify-center">
+                                            <span className="text-sm font-black text-white">{player.assists}</span>
+                                            <span className="text-[9px] font-black uppercase text-slate-500 tracking-tighter">Assist</span>
+                                        </div>
+                                        <div className="bg-white/2 rounded-xl p-3 border border-white/5 flex flex-col items-center justify-center">
+                                            <span className="text-sm font-black text-white">{player.stars.toFixed(0)}</span>
+                                            <span className="text-[9px] font-black uppercase text-slate-500 tracking-tighter">Bonus</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            )
+                        })
+                    )}
                 </div>
             </div>
         </div>

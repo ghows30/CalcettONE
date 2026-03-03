@@ -139,15 +139,16 @@ export default async function MatchesPage({
                                     </div>
                                 </div>
 
-                                <div className="overflow-x-auto">
+                                {/* Desktop View (Table) */}
+                                <div className="hidden md:block overflow-x-auto">
                                     <table className="w-full text-left border-collapse">
                                         <thead>
                                             <tr className="bg-white/5 text-[10px] uppercase tracking-wider text-slate-500 font-bold border-b border-white/10">
-                                                <th className="p-4">Giocatore</th>
+                                                <th className="p-4 pl-8">Giocatore</th>
                                                 <th className="p-4 text-center">G</th>
                                                 <th className="p-4 text-center">A</th>
-                                                <th className="p-4 text-center">Stelle</th>
-                                                <th className="p-4 pr-6 text-right">Azioni</th>
+                                                <th className="p-4 text-center">Voto</th>
+                                                <th className="p-4 pr-8 text-right">Azioni</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-white/5">
@@ -159,7 +160,6 @@ export default async function MatchesPage({
                                                 </tr>
                                             ) : (
                                                 (() => {
-                                                    // Calculate star counts and find MOM
                                                     const starCounts = new Map<string, number>()
                                                     match.match_votes.forEach((v: any) => {
                                                         starCounts.set(v.candidate_id, (starCounts.get(v.candidate_id) || 0) + 1)
@@ -202,6 +202,87 @@ export default async function MatchesPage({
                                             )}
                                         </tbody>
                                     </table>
+                                </div>
+
+                                {/* Mobile View (Cards) */}
+                                <div className="md:hidden divide-y divide-white/5">
+                                    {match.match_stats.length === 0 ? (
+                                        <div className="p-8 text-center text-slate-500 text-sm">
+                                            Nessun partecipante ancora.
+                                        </div>
+                                    ) : (
+                                        (() => {
+                                            const starCounts = new Map<string, number>()
+                                            match.match_votes.forEach((v: any) => {
+                                                starCounts.set(v.candidate_id, (starCounts.get(v.candidate_id) || 0) + 1)
+                                            })
+
+                                            const maxStars = Math.max(0, ...Array.from(starCounts.values()))
+                                            const momIds = maxStars > 0
+                                                ? Array.from(starCounts.entries())
+                                                    .filter(([_, count]) => count === maxStars)
+                                                    .map(([id]) => id)
+                                                : []
+
+                                            const currentUserStat = match.match_stats.find((s: any) => s.player_id === user.id)
+                                            const isCurrentUserLocked = currentUserStat?.is_confirmed || false
+
+                                            return match.match_stats.map((stat: any) => {
+                                                const liveStars = starCounts.get(stat.player_id) || 0
+                                                const hasVoted = match.match_votes.some((v: any) => v.voter_id === user.id && v.candidate_id === stat.player_id)
+                                                const isMOM = match.status === 'finalized'
+                                                    ? stat.vote === Math.max(...match.match_stats.map((s: any) => s.vote || 0)) && stat.vote > 0
+                                                    : momIds.includes(stat.player_id)
+
+                                                return (
+                                                    <div key={stat.id} className="p-5 flex flex-col gap-5">
+                                                        <div className="flex items-center justify-between">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center font-black text-emerald-400 text-xs border border-white/5 uppercase">
+                                                                    {profileMap.get(stat.player_id)?.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || '??'}
+                                                                </div>
+                                                                <div className="flex flex-col">
+                                                                    <span className="font-bold text-white uppercase text-sm tracking-tight">{profileMap.get(stat.player_id) || 'Utente'}</span>
+                                                                    {isMOM && (
+                                                                        <span className="text-[9px] font-black text-yellow-500 uppercase tracking-widest flex items-center gap-1">
+                                                                            <Trophy className="h-2.5 w-2.5" /> MOM
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="flex flex-col items-center bg-white/5 rounded-lg px-2.5 py-1.5 min-w-[36px] border border-white/5">
+                                                                    <span className="text-xs font-black text-white">{stat.goals || 0}</span>
+                                                                    <span className="text-[8px] font-black uppercase text-slate-500">G</span>
+                                                                </div>
+                                                                <div className="flex flex-col items-center bg-white/5 rounded-lg px-2.5 py-1.5 min-w-[36px] border border-white/5">
+                                                                    <span className="text-xs font-black text-white">{stat.assists || 0}</span>
+                                                                    <span className="text-[8px] font-black uppercase text-slate-500">A</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Actions Area */}
+                                                        <div className="pt-4 border-t border-white/5">
+                                                            <StatRow
+                                                                stat={stat}
+                                                                liveAvg={liveStars.toString()}
+                                                                playerName={profileMap.get(stat.player_id) || 'Utente'}
+                                                                isCurrentUser={stat.player_id === user.id}
+                                                                matchStatus={match.status}
+                                                                leagueId={leagueId}
+                                                                matchId={match.id}
+                                                                hasVotedForThisPlayer={hasVoted}
+                                                                isMOM={isMOM}
+                                                                currentUserLocked={isCurrentUserLocked}
+                                                                isMobileCompact={true}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )
+                                            })
+                                        })()
+                                    )}
                                 </div>
                             </div>
                         )
