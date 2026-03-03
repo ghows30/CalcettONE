@@ -103,12 +103,12 @@ export default function MobileNav({ displayName, email, initials }: MobileNavPro
                     </Link>
 
                     <Link
-                        href="/dashboard/profile"
+                        href="/dashboard"
                         onClick={() => setIsOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-colors font-medium"
+                        className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-colors font-medium border border-dashed border-slate-700/50"
                     >
-                        <User className="h-5 w-5" />
-                        Mio Profilo
+                        <PlusSquare className="h-5 w-5" />
+                        Nuova Lega
                     </Link>
                 </div>
 
